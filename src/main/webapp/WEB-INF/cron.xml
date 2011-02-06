@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+  <cron>
+    <url>/twifip</url>
+    <description>Fetch FIP title every 15 seconds</description>
+    <schedule>every 15 seconds</schedule>
+  </cron>
+</cronentries>

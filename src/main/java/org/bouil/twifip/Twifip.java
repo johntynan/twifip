@@ -34,18 +34,6 @@ public class Twifip extends HttpServlet {
     private static TwitterFactory twitterFactory = new TwitterFactory();
 
     private static String previous = null;
-    
-    public void init() throws ServletException {
-        super.init();
-        scheduleCall();
-    }
-
-    private void scheduleCall() {
-        log.info("Queuing call in 15s");
-        Queue queue = QueueFactory.getDefaultQueue();
-
-        queue.add(url("/twifip").method(Method.GET).countdownMillis(15000));
-    }
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -74,7 +62,6 @@ public class Twifip extends HttpServlet {
             log.info("null in fip html");
             writer.println("null");
         }
-        scheduleCall();
     }
 
     private String getCurrentFip() {
