@@ -28,13 +28,13 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 public class Twifip extends HttpServlet {
 
     private static final long serialVersionUID = -5895034370912197747L;
-    
+
     private static final Logger log = Logger.getLogger(Twifip.class.getName());
 
     private static TwitterFactory twitterFactory = new TwitterFactory();
 
     private static String previous = null;
-    
+
     public void init() throws ServletException {
         super.init();
         scheduleCall();
@@ -49,32 +49,34 @@ public class Twifip extends HttpServlet {
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+        synchronized (this) {
 
-        final PrintWriter writer = resp.getWriter();
-        resp.setContentType("text/plain");
-        String current = getCurrentFip();
-        if (current != null) {
-            if (!current.equals(previous)) {
-                writer.println(current);
-                Twitter twitter = twitterFactory.getInstance();
-                try {
-                    log.info("Updating to " + current);
-                    Status status = twitter.updateStatus(current);
-                    previous = current;
-                    writer.println(status.getId());
-                } catch (TwitterException e) {
-                    log.log(Level.SEVERE, e.getMessage(), e);
-                    writer.println(e.getMessage());
+            final PrintWriter writer = resp.getWriter();
+            resp.setContentType("text/plain");
+            String current = getCurrentFip();
+            if (current != null) {
+                if (!current.equals(previous)) {
+                    writer.println(current);
+                    Twitter twitter = twitterFactory.getInstance();
+                    try {
+                        log.info("Updating to " + current);
+                        Status status = twitter.updateStatus(current);
+                        previous = current;
+                        writer.println(status.getId());
+                    } catch (TwitterException e) {
+                        log.log(Level.SEVERE, e.getMessage(), e);
+                        writer.println(e.getMessage());
+                    }
+                } else {
+                    log.info("same as previous " + current);
+                    writer.println("Same as previous = " + current);
                 }
             } else {
-                log.info("same as previous " + current);
-                writer.println("Same as previous = " + current);
+                log.info("null in fip html");
+                writer.println("null");
             }
-        } else {
-            log.info("null in fip html");
-            writer.println("null");
+            scheduleCall();
         }
-        scheduleCall();
     }
 
     private String getCurrentFip() {
@@ -120,12 +122,13 @@ public class Twifip extends HttpServlet {
         }
         return null;
     }
-    
+
     /**
      * Test method
+     * 
      * @param args
      */
-    public static void main(String[] args){
+    public static void main(String[] args) {
         /* display current fip */
         final Twifip twifip = new Twifip();
         System.out.println(twifip.getCurrentFip());
