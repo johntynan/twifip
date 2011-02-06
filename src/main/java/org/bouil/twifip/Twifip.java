@@ -82,7 +82,7 @@ public class Twifip extends HttpServlet {
             URL url = new URL(
                     "http://players.tv-radio.com/radiofrance/metadatas/fipRSS_a_lantenne.html");
             BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    url.openStream(), "UTF-8"));
+                    url.openStream(), "ISO-8859-15"));
             String line = null;
             StringBuilder sb = new StringBuilder();
             final String prefix = "<font face=\"arial\" size=\"2\" color=\"#ffffff\"><b>";
@@ -119,5 +119,15 @@ public class Twifip extends HttpServlet {
             log.log(Level.SEVERE, e.getMessage(), e);
         }
         return null;
+    }
+    
+    /**
+     * Test method
+     * @param args
+     */
+    public static void main(String[] args){
+        /* display current fip */
+        final Twifip twifip = new Twifip();
+        System.out.println(twifip.getCurrentFip());
     }
 }
