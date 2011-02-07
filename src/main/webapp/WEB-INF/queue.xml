@@ -1,0 +1,6 @@
+<queue-entries>
+  <queue>
+    <name>default</name>
+    <rate>4/m</rate>
+  </queue>
+</queue-entries>
