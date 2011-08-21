@@ -23,7 +23,6 @@ import twitter4j.TwitterFactory;
 
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.TaskAlreadyExistsException;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class Twifip extends HttpServlet {
@@ -36,7 +35,6 @@ public class Twifip extends HttpServlet {
 
     private static String previous = null;
 
-    @Override
     public void init() throws ServletException {
         super.init();
         scheduleCall();
@@ -46,15 +44,9 @@ public class Twifip extends HttpServlet {
         log.info("Queuing call in 15s");
         Queue queue = QueueFactory.getDefaultQueue();
 
-        try {
-            queue.add(url("/twifip").method(Method.GET).countdownMillis(15000)
-                    .taskName("twifip"));
-        } catch (TaskAlreadyExistsException e) {
-            log.log(Level.WARNING, "Task already exists", e);
-        }
+        queue.add(url("/twifip").method(Method.GET).countdownMillis(15000));
     }
 
-    @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         synchronized (this) {
