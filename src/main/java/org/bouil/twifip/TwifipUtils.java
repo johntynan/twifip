@@ -94,6 +94,8 @@ public class TwifipUtils {
                 trackInfo.artist = artist;
                 trackInfo.album = album;
                 trackInfo.correctAlbum();
+
+                return trackInfo;
             }
             return null;
         }
