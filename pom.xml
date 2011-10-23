@@ -109,6 +109,13 @@
 			<artifactId>twitter4j-core</artifactId>
 			<version>2.1.0</version>
 		</dependency>
+
+        <!-- installed manually as maven artifact from http://code.google.com/p/lastfm-java/ -->
+        <dependency>
+            <groupId>fm.last</groupId>
+            <artifactId>bindings</artifactId>
+            <version>0.1.0</version>
+        </dependency>
 	</dependencies>
 
 	<build>
