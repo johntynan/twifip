@@ -120,14 +120,16 @@ public class TwifipUtils {
         }
     }
 
-    public void updateTwitter(String current, PrintWriter writer) {
+    public boolean updateTwitter(String current, PrintWriter writer) {
         try {
             Twitter twitter = twitterFactory.getInstance();
             Status status = twitter.updateStatus(current);
             log.log(Level.FINE, "Twitter status id " + status.getId());
+            return true;
         } catch (Exception e) {
             log.log(Level.SEVERE, e.getMessage(), e);
             writer.println(e.getMessage());
+            return false;
         }
     }
 

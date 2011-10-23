@@ -37,8 +37,7 @@ public class Twifip extends HttpServlet {
         queue.add(url("/twifip").method(Method.GET).countdownMillis(15000));
     }
 
-    public void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException {
+    public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         synchronized (this) {
 
             final PrintWriter writer = resp.getWriter();
@@ -48,8 +47,9 @@ public class Twifip extends HttpServlet {
                 if (!current.equals(previous)) {
                     writer.println(current);
                     log.info("Updating to " + current);
-                    twifipUtils.updateTwitter(current, writer);
-                    twifipUtils.updateLastfm(current, writer);
+                    if (twifipUtils.updateTwitter(current, writer)) {
+                        twifipUtils.updateLastfm(current, writer);
+                    }
                     previous = current;
                 } else {
                     log.info("same as previous " + current);
