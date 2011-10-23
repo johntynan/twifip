@@ -50,19 +50,23 @@ public class TwifipUtils {
     }
 
     public void updateLastfm(String current, PrintWriter writer) {
-        TrackInfo trackInfo = new TrackInfo(current);
-        Session session = Authenticator.getMobileSession(lastFmUser, lastFmPassword, lastfmApiKey, lastFmApiSecret);
-        ScrobbleData scrobbleData = new ScrobbleData();
-        scrobbleData.setAlbum(trackInfo.album);
-        scrobbleData.setArtist(trackInfo.artist);
-        scrobbleData.setTrack(trackInfo.title);
-        scrobbleData.setTimestamp((int) (System.currentTimeMillis() / 1000));
+        try {
+            TrackInfo trackInfo = new TrackInfo(current);
+            Session session = Authenticator.getMobileSession(lastFmUser, lastFmPassword, lastfmApiKey, lastFmApiSecret);
+            ScrobbleData scrobbleData = new ScrobbleData();
+            scrobbleData.setAlbum(trackInfo.album);
+            scrobbleData.setArtist(trackInfo.artist);
+            scrobbleData.setTrack(trackInfo.title);
+            scrobbleData.setTimestamp((int) (System.currentTimeMillis() / 1000));
 
-        ScrobbleResult result = Track.scrobble(scrobbleData, session);
-        writer.println(result);
+            ScrobbleResult result = Track.scrobble(scrobbleData, session);
+            writer.println(result);
 
-        Result tagResult = Track.addTags(trackInfo.artist, trackInfo.title, "fip", session);
-        writer.println(result);
+            Result tagResult = Track.addTags(trackInfo.artist, trackInfo.title, "fip", session);
+            writer.println(result);
+        } catch (Exception e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+        }
     }
 
     public static class TrackInfo {
@@ -101,7 +105,7 @@ public class TwifipUtils {
             Twitter twitter = twitterFactory.getInstance();
             Status status = twitter.updateStatus(current);
             writer.println(status.getId());
-        } catch (TwitterException e) {
+        } catch (Exception e) {
             log.log(Level.SEVERE, e.getMessage(), e);
             writer.println(e.getMessage());
         }

@@ -51,7 +51,6 @@ public class Twifip extends HttpServlet {
                     twifipUtils.updateTwitter(current, writer);
                     twifipUtils.updateLastfm(current, writer);
                     previous = current;
-
                 } else {
                     log.info("same as previous " + current);
                     writer.println("Same as previous = " + current);
