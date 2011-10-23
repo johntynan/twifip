@@ -10,6 +10,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sun.tools.corba.se.idl.StringGen;
+
 import de.umass.lastfm.Authenticator;
 import de.umass.lastfm.Result;
 import de.umass.lastfm.Session;
@@ -51,19 +53,24 @@ public class TwifipUtils {
 
     public void updateLastfm(String current, PrintWriter writer) {
         try {
-            TrackInfo trackInfo = new TrackInfo(current);
-            Session session = Authenticator.getMobileSession(lastFmUser, lastFmPassword, lastfmApiKey, lastFmApiSecret);
-            ScrobbleData scrobbleData = new ScrobbleData();
-            scrobbleData.setAlbum(trackInfo.album);
-            scrobbleData.setArtist(trackInfo.artist);
-            scrobbleData.setTrack(trackInfo.title);
-            scrobbleData.setTimestamp((int) (System.currentTimeMillis() / 1000));
+            TrackInfo trackInfo = TrackInfo.createTrackInfo(current);
+            if (trackInfo != null) {
+                Session session =
+                        Authenticator.getMobileSession(lastFmUser, lastFmPassword, lastfmApiKey, lastFmApiSecret);
+                ScrobbleData scrobbleData = new ScrobbleData();
+                scrobbleData.setAlbum(trackInfo.album);
+                scrobbleData.setArtist(trackInfo.artist);
+                scrobbleData.setTrack(trackInfo.title);
+                scrobbleData.setTimestamp((int) (System.currentTimeMillis() / 1000));
 
-            ScrobbleResult result = Track.scrobble(scrobbleData, session);
-            writer.println(result);
+                ScrobbleResult result = Track.scrobble(scrobbleData, session);
+                log.log(Level.FINE, result.toString());
+                writer.println(result);
 
-            Result tagResult = Track.addTags(trackInfo.artist, trackInfo.title, "fip", session);
-            writer.println(result);
+                Result tagResult = Track.addTags(trackInfo.artist, trackInfo.title, "fip", session);
+                log.log(Level.FINE, result.toString());
+                writer.println(result);
+            }
         } catch (Exception e) {
             log.log(Level.SEVERE, e.getMessage(), e);
         }
@@ -74,21 +81,36 @@ public class TwifipUtils {
         public String artist;
         public String album;
 
-        public TrackInfo(String current) {
+        public static TrackInfo createTrackInfo(String current) {
             String[] split = current.trim().split(" - ");
             if (split.length >= 3) {
-                title = split[0].trim();
-                artist = split[1].trim();
-                album = split[2].trim();
-                int lastSpacePosition = album.lastIndexOf(' ');
-                if (lastSpacePosition != -1) {
-                    String year = album.substring(lastSpacePosition + 1, album.length()).trim();
-                    try {
-                        Integer.parseInt(year);
-                        album = album.substring(0, lastSpacePosition).trim();
-                    } catch (NumberFormatException e) {
-                        // no year
-                    }
+                String title = split[0].trim();
+                String artist = split[1].trim();
+                String album = split[2].trim();
+
+                if (title.contains("BONNE NUIT SUR FIP") || title.startsWith("FIP ACTUALITE") ||
+                        (artist == null && album == null)) {
+                    return null;
+                }
+
+                TrackInfo trackInfo = new TrackInfo();
+                trackInfo.title = title;
+                trackInfo.artist = artist;
+                trackInfo.album = album;
+                trackInfo.correctAlbum();
+            }
+            return null;
+        }
+
+        private void correctAlbum() {
+            int lastSpacePosition = album.lastIndexOf(' ');
+            if (lastSpacePosition != -1) {
+                String year = album.substring(lastSpacePosition + 1, album.length()).trim();
+                try {
+                    Integer.parseInt(year);
+                    album = album.substring(0, lastSpacePosition).trim();
+                } catch (NumberFormatException e) {
+                    // no year
                 }
             }
         }
@@ -104,7 +126,7 @@ public class TwifipUtils {
         try {
             Twitter twitter = twitterFactory.getInstance();
             Status status = twitter.updateStatus(current);
-            writer.println(status.getId());
+            log.log(Level.FINE, "Twitter status id " + status.getId());
         } catch (Exception e) {
             log.log(Level.SEVERE, e.getMessage(), e);
             writer.println(e.getMessage());
@@ -154,7 +176,7 @@ public class TwifipUtils {
         final TwifipUtils twifipUtils = new TwifipUtils();
         String currentFip = twifipUtils.getCurrentFip();
         System.out.println(currentFip);
-        System.out.println(new TrackInfo(currentFip));
+        System.out.println(TrackInfo.createTrackInfo(currentFip));
         PrintWriter writer = new PrintWriter(System.out);
         twifipUtils.updateLastfm(currentFip, writer);
         writer.close();
